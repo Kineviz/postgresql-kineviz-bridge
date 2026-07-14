@@ -1,0 +1,29 @@
+# Runtime logs & captured query streams
+logs/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+
+# OS / editor
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+todo.md
+# KuzuDB parity build (parallel dataset) & derived reference server
+paysim_kuzu
+paysim_kuzu.wal
+kuzu_ref_server.py
+
+# Internal GraphXR bug report (not part of the public bridge)
+docs/graphxr-savetograph-false-bug.html
+scripts/load_paysim_kuzu.py
+
+# PaySim CSVs live compressed in paysim_data.zip; the loader unzips here
+fixtures/paysim/data/

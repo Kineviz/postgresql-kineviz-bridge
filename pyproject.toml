@@ -1,0 +1,18 @@
+[project]
+name = "pg-kineviz-bridge"
+version = "0.1.0"
+description = "PostgreSQL 19 SQL/PGQ property graph → Kineviz bridge (Cypher-over-HTTP)"
+requires-python = ">=3.9"
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn[standard]>=0.24.0",
+    "pydantic>=2.0.0",
+]
+
+[project.optional-dependencies]
+# Only needed for the live PostgreSQL 19 backend (--backend pg).
+pg = ["psycopg[binary]>=3.1"]
+dev = ["pytest>=7.0", "httpx>=0.24"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

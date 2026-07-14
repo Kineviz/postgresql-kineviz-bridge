@@ -1,0 +1,16 @@
+{"query": "RETURN \"api\" AS a", "params": {}, "note": "liveness probe on connect"}
+{"query": "CALL schema()", "params": {}, "note": "schema browser"}
+{"query": "SHOW TABLES", "params": {}, "note": "table listing"}
+{"query": "MATCH (n) RETURN count(n)", "params": {}, "note": "node count panel"}
+{"query": "MATCH ()-[r]->() RETURN count(r)", "params": {}, "note": "edge count panel"}
+{"query": "MATCH (n) RETURN n LIMIT 100", "params": {}, "note": "untyped sample"}
+{"query": "MATCH (n:Person) RETURN n LIMIT 500", "params": {}, "note": "typed all-nodes"}
+{"query": "MATCH (n:Person) WHERE toLower(n.name) CONTAINS toLower('AL') RETURN n", "params": {}, "note": "substring search"}
+{"query": "MATCH (n:Company) WHERE n.name STARTS WITH 'Acme' RETURN n", "params": {}, "note": "prefix search"}
+{"query": "MATCH (a:Person)-[r:WORKS_AT]->(b:Company) RETURN a, r, b LIMIT 1000", "params": {}, "note": "one-hop directed"}
+{"query": "MATCH (a:Person)-[r:KNOWS]->(b:Person) RETURN * LIMIT 1000", "params": {}, "note": "one-hop RETURN *"}
+{"query": "MATCH (a:Company)<-[r:WORKS_AT]-(b:Person) RETURN *", "params": {}, "note": "reverse direction"}
+{"query": "MATCH (a:Person)-[r:KNOWS]-(b:Person) RETURN *", "params": {}, "note": "undirected"}
+{"query": "MATCH (a:Person)-[r:WORKS_AT]->(b:Company) WHERE r.title = 'CTO' RETURN *", "params": {}, "note": "edge property filter"}
+{"query": "MATCH (n)-[r]->(m) WHERE id(n) IN [internal_id(0, 0)] RETURN n, r, m LIMIT 500", "params": {}, "note": "expand outbound (ids are session-dependent)"}
+{"query": "MATCH (n)-[r]-(m) WHERE id(n) IN [internal_id(0, 0)] RETURN *", "params": {}, "note": "expand either-direction"}
