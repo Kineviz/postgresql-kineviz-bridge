@@ -27,3 +27,4 @@ scripts/load_paysim_kuzu.py
 
 # PaySim CSVs live compressed in paysim_data.zip; the loader unzips here
 fixtures/paysim/data/
+docs/graphxr-database-proxy-connect-fix.html

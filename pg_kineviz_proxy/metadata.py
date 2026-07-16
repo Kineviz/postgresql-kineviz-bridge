@@ -77,6 +77,7 @@ def collect_schema(conn, graph_name: str) -> Tuple[Dict[str, NodeSchema], Dict[s
 
     endpoints: Dict[str, Dict[str, str]] = {}
     edge_fk_cols: Dict[str, set] = {}
+    edge_end_col: Dict[str, Dict[str, str]] = {}   # alias -> {SOURCE: col, DESTINATION: col}
     for edge_alias, end, vtx_alias, edge_col in q(
             "SELECT edge_table_alias, edge_end, vertex_table_alias, edge_table_column_name "
             "FROM information_schema.pg_edge_table_components WHERE property_graph_name = %s"):
@@ -85,6 +86,7 @@ def collect_schema(conn, graph_name: str) -> Tuple[Dict[str, NodeSchema], Dict[s
         # Kineviz/Kuzu never surface them as properties, so exclude them below.
         if edge_col:
             edge_fk_cols.setdefault(edge_alias, set()).add(edge_col)
+            edge_end_col.setdefault(edge_alias, {})[end.upper()] = edge_col
 
     node_schemas: Dict[str, NodeSchema] = {}
     rel_schemas: Dict[str, RelSchema] = {}
@@ -96,7 +98,7 @@ def collect_schema(conn, graph_name: str) -> Tuple[Dict[str, NodeSchema], Dict[s
         if kind == "VERTEX":
             keys = alias_keys.get(alias) or list(props.keys())[:1]
             pk = keys[0] if keys else "id"
-            node_schemas[label] = NodeSchema(label=label, primary_key=pk, properties=props)
+            node_schemas[label] = NodeSchema(label=label, primary_key=pk, properties=props, keys=list(keys))
             tables[label] = alias_table[alias]
         elif kind == "EDGE":
             ep = endpoints.get(alias, {})
@@ -106,7 +108,10 @@ def collect_schema(conn, graph_name: str) -> Tuple[Dict[str, NodeSchema], Dict[s
                 continue
             fk = edge_fk_cols.get(alias, set())
             edge_props = {p: t for p, t in props.items() if p not in fk}
-            rel_schemas[label] = RelSchema(type=label, src_label=src, dst_label=dst, properties=edge_props)
+            ends = edge_end_col.get(alias, {})
+            rel_keys = [c for c in (ends.get("SOURCE"), ends.get("DESTINATION")) if c]
+            rel_schemas[label] = RelSchema(type=label, src_label=src, dst_label=dst,
+                                           properties=edge_props, keys=rel_keys)
             tables[label] = alias_table[alias]
 
     return node_schemas, rel_schemas, tables

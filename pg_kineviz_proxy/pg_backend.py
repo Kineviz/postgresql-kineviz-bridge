@@ -86,7 +86,7 @@ class Pg19Backend(Backend):
                 "Pg19Backend.execute needs a live connection; use compile() to inspect the SQL"
             )
         rows = self._run(compiled.sql, compiled.params)
-        return convert_rows(rows, compiled.manifest, self.registry)
+        return convert_rows(rows, compiled.manifest)   # outbound ids = stable element_id
 
     # ----- the compiler (requirement 1: Cypher plan -> SQL/PGQ) -----
 

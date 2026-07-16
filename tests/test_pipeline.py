@@ -396,6 +396,17 @@ def test_order_by_aggregate_expression():
     assert [r[0] for r in o.data[1:]] == ["Alice", "Bob"]
 
 
+def test_element_id_round_trips_stably():
+    """Stateless Element_ID: encode/decode round-trips and is stable across calls."""
+    from pg_kineviz_proxy import element_id as E
+    for label, key in [("Client", ("4000262298158823",)), ("Merchant", ("M0001",)),
+                       ("Transaction", (12345,)), ("Client", ("a", "b"))]:
+        eid = E.encode(label, key)
+        assert E.decode(eid) == (label, tuple(key))
+        assert E.encode(label, key) == eid               # deterministic / stable
+    assert E.decode("not-an-element-id!") is None        # rejects non-ours
+
+
 def _run_all():
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_") and callable(v)]
     for fn in fns:

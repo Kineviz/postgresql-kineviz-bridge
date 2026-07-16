@@ -59,8 +59,16 @@ def create_app(backend, default_db_name: str = "postgres-graph") -> FastAPI:
     app = FastAPI(title="PostgreSQL 19 → Kineviz Bridge", version="0.1.0", lifespan=lifespan)
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"], allow_credentials=True, allow_methods=["*"], allow_headers=["*"],
+        # Reflect the caller's origin (not literal "*") so it stays valid even with
+        # credentials — a browser rejects `Access-Control-Allow-Origin: *` on a
+        # credentialed request, which silently blocks the response despite a 200.
+        allow_origin_regex=".*", allow_credentials=True, allow_methods=["*"], allow_headers=["*"],
     )
+
+    # Database Proxy contract (Kineviz "Database Proxy" connector) — clean, stable
+    # string ids. Coexists with the legacy /postgres-graph KoreDB endpoint below.
+    from pg_kineviz_proxy.proxy_api import add_database_proxy_routes
+    add_database_proxy_routes(app, backend, logger)
 
     @app.get("/health")
     async def health():

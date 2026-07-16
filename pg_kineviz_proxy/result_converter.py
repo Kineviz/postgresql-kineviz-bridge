@@ -8,13 +8,20 @@ compiler emitted, minting ids through the shared registry. No server-side dedup
 
 from __future__ import annotations
 
-from typing import Any, Dict, List
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
+from . import element_id
 from .backend import GraphNode, GraphRel, GraphResult
-from .identity import IdentityRegistry
+
+IdFn = Callable[[str, Tuple[Any, ...]], str]
 
 
-def convert_rows(rows: List[Dict[str, Any]], manifest: Dict[str, Any], registry: IdentityRegistry) -> GraphResult:
+def convert_rows(rows: List[Dict[str, Any]], manifest: Dict[str, Any],
+                 id_fn: Optional[IdFn] = None) -> GraphResult:
+    """Build nodes/relationships from GRAPH_TABLE rows. `id_fn(label, key)` mints
+    each element id; defaults to the stable, stateless base64 `element_id`."""
+    if id_fn is None:
+        id_fn = element_id.encode
     out = GraphResult()
     for row in rows:
         keys_by_var: Dict[str, tuple] = {}
@@ -32,7 +39,7 @@ def convert_rows(rows: List[Dict[str, Any]], manifest: Dict[str, Any], registry:
             if pk and pk not in props and key_vals and key_vals[0] is not None:
                 props[pk] = key_vals[0]
             out.nodes.append(
-                GraphNode(id=registry.node_id(v["alias"], key_vals), labels=[v["alias"]], properties=props)
+                GraphNode(id=id_fn(v["alias"], key_vals), labels=[v["alias"]], properties=props)
             )
 
         for e in manifest.get("edges", []):
@@ -46,9 +53,9 @@ def convert_rows(rows: List[Dict[str, Any]], manifest: Dict[str, Any], registry:
             props = {k: val for k, val in props.items() if val is not None}
             out.relationships.append(
                 GraphRel(
-                    id=registry.node_id(e["alias"], src_key + dst_key),
-                    startNodeId=registry.node_id(e["src_alias"], src_key),
-                    endNodeId=registry.node_id(e["dst_alias"], dst_key),
+                    id=id_fn(e["alias"], src_key + dst_key),
+                    startNodeId=id_fn(e["src_alias"], src_key),
+                    endNodeId=id_fn(e["dst_alias"], dst_key),
                     type=e["alias"],
                     properties=props,
                 )

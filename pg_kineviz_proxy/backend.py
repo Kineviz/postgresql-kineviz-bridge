@@ -23,6 +23,7 @@ class NodeSchema:
     label: str
     primary_key: str                       # property name that identifies the vertex
     properties: Dict[str, str]             # property name -> Kineviz/Kuzu type string
+    keys: List[str] = field(default_factory=list)   # full key column list (composite-safe)
 
 
 @dataclass
@@ -31,6 +32,7 @@ class RelSchema:
     src_label: str
     dst_label: str
     properties: Dict[str, str] = field(default_factory=dict)
+    keys: List[str] = field(default_factory=list)   # endpoint join columns (source, dest)
 
 
 # ----- query intermediate representation (produced by cypher_translator) -----
